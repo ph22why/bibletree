@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,6 +8,11 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  void main() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -15,30 +21,28 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyTree(),
+      home: Tree(),
     );
   }
 }
 
-class MyTree extends StatefulWidget {
+class Tree extends StatefulWidget {
   @override
-  _MyTreeState createState() => _MyTreeState();
+  _TreeState createState() => _TreeState();
 }
 
-class _MyTreeState extends State<MyTree> {
+class _TreeState extends State<Tree> {
   int _counter = 0;
   int _bottlecounter = 0;
 
-  void _incrementCounter() {
+  void _incrementCounter(DocumentSnapshot doc) {
     setState(() {
       _counter++;
     });
-  }
-
-  void _bottleincre() {
-    setState(() {
-      _bottlecounter++;
-    });
+    FirebaseFirestore.instance
+        .collection('counter')
+        .doc(doc.id)
+        .update({"counter": FieldValue.increment(1)});
   }
 
   @override
@@ -72,8 +76,7 @@ class _MyTreeState extends State<MyTree> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 FloatingActionButton(
-                  onPressed: _incrementCounter,
-                  tooltip: '증가',
+                  onPressed: () => _incrementCounter,
                   child: Image.asset('images/waterbottle.png'),
                 ),
               ],
